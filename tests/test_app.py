@@ -7,6 +7,7 @@ from pathlib import Path
 import pygame
 from snake_game.app import Game
 from snake_game.config import GameConfig
+from snake_game.core import Direction
 from snake_game.storage import HighScoreTable
 
 
@@ -19,11 +20,37 @@ def test_renders_a_frame_headless(tmp_path: Path) -> None:
     try:
         game.state.food = (1, 1)
 
-        game.renderer.draw(game.state, best=0)
+        game.renderer.draw(game.state, best=0, paused=False)
 
         surface = pygame.display.get_surface()
         assert surface is not None
-        assert surface.get_size() == (8 * 20, 6 * 20)
+        assert surface.get_size() == (8 * 20, 6 * 20 + 36)
+    finally:
+        pygame.quit()
+
+
+def test_pause_stops_updates_and_blocks_turns(tmp_path: Path) -> None:
+    game = Game(
+        GameConfig(grid_width=10, grid_height=8),
+        seed=0,
+        scores_path=tmp_path / "scores.json",
+    )
+    try:
+        head_before = game.state.head
+
+        game._handle_key(pygame.K_p)
+        assert game.paused
+
+        game._handle_key(pygame.K_UP)
+        game._update()
+        assert game.state.head == head_before
+        assert game.state.pending_direction is Direction.RIGHT
+
+        game._handle_key(pygame.K_p)
+        assert not game.paused
+
+        game._update()
+        assert game.state.head != head_before
     finally:
         pygame.quit()
 
@@ -37,11 +64,13 @@ def test_restart_after_death(tmp_path: Path) -> None:
     try:
         game.state.alive = False
         game.state.score = 7
+        game.paused = True
 
         game._handle_key(pygame.K_RETURN)
 
         assert game.state.alive
         assert game.state.score == 0
+        assert not game.paused
     finally:
         pygame.quit()
 

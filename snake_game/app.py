@@ -42,6 +42,7 @@ class Game:
         self.renderer = Renderer(self.config, Palette())
         self.scores = HighScoreTable(scores_path)
         self._running = True
+        self.paused = False
         self._score_saved = False
 
     def run(self) -> None:
@@ -66,16 +67,22 @@ class Game:
             if key in (pygame.K_RETURN, pygame.K_SPACE):
                 self._restart()
             return
+        if key in (pygame.K_p, pygame.K_PAUSE):
+            self.paused = not self.paused
+            return
+        if self.paused:
+            return
         direction = KEY_DIRECTIONS.get(key)
         if direction is not None:
             self.state.request_direction(direction)
 
     def _restart(self) -> None:
         self.state.reset()
+        self.paused = False
         self._score_saved = False
 
     def _update(self) -> None:
-        if not self.state.alive:
+        if self.paused or not self.state.alive:
             return
         if self.state.step().died:
             self._record_score()
@@ -94,7 +101,7 @@ class Game:
             pass
 
     def _draw(self) -> None:
-        self.renderer.draw(self.state, best=self.scores.best)
+        self.renderer.draw(self.state, best=self.scores.best, paused=self.paused)
 
 
 def main() -> int:
