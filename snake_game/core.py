@@ -123,8 +123,7 @@ class GameState:
             hit_wall = False
         else:
             hit_wall = not (
-                0 <= new_head[0] < config.grid_width
-                and 0 <= new_head[1] < config.grid_height
+                0 <= new_head[0] < config.grid_width and 0 <= new_head[1] < config.grid_height
             )
 
         # The tail leaves its cell on the same tick unless the snake grows, so

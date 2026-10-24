@@ -8,3 +8,12 @@ dist/
 *.spec
 .vscode/
 .idea/
+
+# tooling caches and artefacts
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.egg-info/

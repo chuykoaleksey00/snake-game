@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pygame
-
 from snake_game.app import Game
 from snake_game.config import GameConfig
 

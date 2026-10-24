@@ -74,7 +74,5 @@ class Renderer:
         self.screen.blit(title, title.get_rect(center=(center_x, center_y - 40)))
         for offset, line in enumerate(lines):
             rendered = self.small_font.render(line, True, self.palette.text)
-            position = rendered.get_rect(
-                center=(center_x, center_y + 10 + offset * 24)
-            )
+            position = rendered.get_rect(center=(center_x, center_y + 10 + offset * 24))
             self.screen.blit(rendered, position)
