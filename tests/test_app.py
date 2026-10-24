@@ -5,7 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 
 import pygame
-from snake_game.app import Game
+import pytest
+from snake_game import __version__
+from snake_game.app import Game, main
 from snake_game.config import GameConfig
 from snake_game.core import Direction
 from snake_game.storage import HighScoreTable
@@ -93,3 +95,11 @@ def test_score_is_persisted_once_after_death(tmp_path: Path) -> None:
         assert [entry.score for entry in entries] == [3]
     finally:
         pygame.quit()
+
+
+def test_cli_reports_version(capsys: pytest.CaptureFixture[str]) -> None:
+    with pytest.raises(SystemExit) as excinfo:
+        main(["--version"])
+
+    assert excinfo.value.code == 0
+    assert __version__ in capsys.readouterr().out

@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import argparse
+import os
 import random
+import sys
 from pathlib import Path
 
 import pygame
 
+from . import __version__
 from .config import GameConfig, Palette
 from .core import Direction, GameState
 from .render import Renderer
@@ -104,11 +108,46 @@ class Game:
         self.renderer.draw(self.state, best=self.scores.best, paused=self.paused)
 
 
-def main() -> int:
+def _ensure_standard_streams() -> None:
+    """Windowed PyInstaller builds start with ``sys.stdout`` set to ``None``."""
+    for name in ("stdout", "stderr"):
+        if getattr(sys, name) is None:
+            setattr(sys, name, open(os.devnull, "w", encoding="utf-8"))
+
+
+def main(argv: list[str] | None = None) -> int:
+    _ensure_standard_streams()
+    parser = argparse.ArgumentParser(
+        prog="snake-game",
+        description="Classic snake game built on pygame.",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
+    )
+    parser.add_argument(
+        "--scores",
+        type=Path,
+        default=None,
+        help="path to the JSON high score file",
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help=argparse.SUPPRESS,
+    )
+    args = parser.parse_args(argv)
+
     try:
-        Game().run()
+        Game(scores_path=args.scores, seed=args.seed).run()
     except KeyboardInterrupt:
         return 130
     finally:
         pygame.quit()
     return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -5,7 +5,6 @@ venv/
 env/
 build/
 dist/
-*.spec
 .vscode/
 .idea/
 
