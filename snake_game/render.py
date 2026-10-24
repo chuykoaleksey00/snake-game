@@ -25,7 +25,7 @@ class Renderer:
         self.big_font = pygame.font.SysFont("consolas", 44, bold=True)
         self.small_font = pygame.font.SysFont("consolas", 17)
 
-    def draw(self, state: GameState) -> None:
+    def draw(self, state: GameState, *, best: int = 0) -> None:
         """Render a full frame and flip the display buffer."""
         self.screen.fill(self.palette.background)
         self._draw_grid()
@@ -34,11 +34,11 @@ class Renderer:
         for index, segment in enumerate(state.snake):
             color = self.palette.snake_head if index == 0 else self.palette.snake_body
             self._draw_cell(segment, color)
-        self._draw_score(state.score)
+        self._draw_score(state.score, best)
         if not state.alive:
             self._draw_overlay(
                 "GAME OVER",
-                [f"Score: {state.score}", "Enter / Space - restart, Esc - exit"],
+                [f"Score: {state.score}", f"Best: {best}", "Enter / Space - restart, Esc - exit"],
                 self.palette.food,
             )
         pygame.display.flip()
@@ -59,9 +59,14 @@ class Renderer:
         for y in range(0, self.height + 1, self.config.cell_size):
             pygame.draw.line(self.screen, self.palette.grid, (0, y), (self.width, y))
 
-    def _draw_score(self, score: int) -> None:
-        surface = self.font.render(f"Score: {score}", True, self.palette.text)
-        self.screen.blit(surface, (10, 8))
+    def _draw_score(self, score: int, best: int) -> None:
+        score_surface = self.font.render(f"Score: {score}", True, self.palette.text)
+        best_surface = self.font.render(f"Best: {best}", True, self.palette.text)
+        self.screen.blit(score_surface, (10, 8))
+        self.screen.blit(
+            best_surface,
+            (self.width - best_surface.get_width() - 10, 8),
+        )
 
     def _draw_overlay(self, title_text: str, lines: list[str], color: tuple[int, int, int]) -> None:
         overlay = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
